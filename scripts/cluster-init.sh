@@ -141,8 +141,9 @@ install_helm(){
   # Fix PATH para helm
   if ! echo $PATH | grep -q "/usr/local/bin"; then
     log "Agregando /usr/local/bin al PATH"
-    echo 'export PATH=$PATH:/usr/local/bin' >> /etc/profile.d/helm.sh
+    echo 'export PATH=$PATH:/usr/local/bin' >> ~/.bashrc
     export PATH=$PATH:/usr/local/bin
+    source ~/.bashrc || true
   fi
 
   helm version
