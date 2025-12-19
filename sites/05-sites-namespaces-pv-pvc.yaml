@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Namespace
+metadata: { name: site1 }
+---
+apiVersion: v1
+kind: Namespace
+metadata: { name: site2 }
+---
+apiVersion: v1
+kind: Namespace
+metadata: { name: site3 }
+# PV/PVC para cada sitio apuntando a /fsds00Comun/00Web/siteX

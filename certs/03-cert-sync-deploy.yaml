@@ -1,0 +1,91 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cert-sync
+  namespace: certs
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cert-sync
+  template:
+    metadata:
+      labels:
+        app: cert-sync
+    spec:
+      serviceAccountName: cert-sync-sa
+      containers:
+        - name: cert-sync
+          image: alpine:3.20
+          command: ["/bin/sh","-c"]
+          args:
+            - |
+              apk add --no-cache bash curl openssl ca-certificates
+              KVER="$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)"
+              curl -sL "https://storage.googleapis.com/kubernetes-release/release/${KVER}/bin/linux/amd64/kubectl" -o /usr/local/bin/kubectl
+              chmod +x /usr/local/bin/kubectl
+              cat >/usr/local/bin/sync-certs.sh <<'EOF'
+              #!/usr/bin/env bash
+              set -euo pipefail
+              NFS_DIR="${NFS_DIR:-/mnt/nfs/00Comun/00Certs}"
+              TARGET_NS="${TARGET_NS:-certs}"
+              SLEEP_SEC="${SLEEP_SEC:-90}"
+              normalize_secret_name(){ local n="${1//./}"; echo "secret_${n}"; }
+              compute_pair_hash(){ sha256sum "$1" "$2" | awk '{print $1}' | sha256sum | awk '{print $1}'; }
+              list_domains(){ find "$NFS_DIR" -maxdepth 1 -type f -printf "%f\n" | sed -E 's/\.(cer|crt|pem|key)$//' | sort -u; }
+              validate_crt_key(){ local crt="$1" key="$2"; openssl x509 -noout -modulus -in "$crt" | openssl md5 | grep -q "$(openssl rsa -noout -modulus -in "$key" | openssl md5)"; }
+              resolve_material(){
+                local d="$1"; local crt="" key="" pem=""
+                [[ -f "$NFS_DIR/$d.crt" ]] && crt="$NFS_DIR/$d.crt"
+                [[ -f "$NFS_DIR/$d.cer" && -z "$crt" ]] && crt="$NFS_DIR/$d.cer"
+                [[ -f "$NFS_DIR/$d.key" ]] && key="$NFS_DIR/$d.key"
+                [[ -f "$NFS_DIR/$d.pem" ]] && pem="$NFS_DIR/$d.pem"
+                echo "$crt|$key|$pem"
+              }
+              upsert_secret(){
+                local s="$1" d="$2" crt="$3" key="$4" h="$5"
+                if kubectl -n "$TARGET_NS" get secret "$s" >/dev/null 2>&1; then
+                  prev="$(kubectl -n "$TARGET_NS" get secret "$s" -o jsonpath='{.metadata.annotations.sync-hash}' 2>/dev/null || true)"
+                  if [[ "$prev" == "$h" && -n "$prev" ]]; then echo "[SKIP] $d"; return 0; fi
+                  kubectl -n "$TARGET_NS" create secret tls "$s" --cert="$crt" --key="$key" --dry-run=client -o yaml | kubectl -n "$TARGET_NS" apply -f -
+                  kubectl -n "$TARGET_NS" annotate secret "$s" sync-hash="$h" --overwrite
+                else
+                  kubectl -n "$TARGET_NS" create secret tls "$s" --cert="$crt" --key="$key"
+                  kubectl -n "$TARGET_NS" annotate secret "$s" sync-hash="$h"
+                fi
+                echo "[UPSERT] $d -> $s"
+              }
+              while true; do
+                for domain in $(list_domains); do
+                  IFS='|' read -r crt key pem <<<"$(resolve_material "$domain")"
+                  if [[ -n "$crt" && -n "$key" ]] && validate_crt_key "$crt" "$key"; then
+                    h="$(compute_pair_hash "$crt" "$key")"
+                    s="$(normalize_secret_name "$domain")"
+                    upsert_secret "$s" "$domain" "$crt" "$key" "$h"
+                  else
+                    echo "[WARN] $domain: faltan crt/key válidos"
+                  fi
+                done
+                sleep "$SLEEP_SEC"
+              done
+              EOF
+              chmod +x /usr/local/bin/sync-certs.sh
+              export NFS_DIR="/mnt/nfs/00Comun/00Certs"
+              export TARGET_NS="certs"
+              export SLEEP_SEC="90"
+              /usr/local/bin/sync-certs.sh
+          volumeMounts:
+            - name: nfs-certs
+              mountPath: /mnt/nfs
+              readOnly: true
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "250m"
+              memory: "256Mi"
+      volumes:
+        - name: nfs-certs
+          persistentVolumeClaim:
+            claimName: pvc-nfs-certs

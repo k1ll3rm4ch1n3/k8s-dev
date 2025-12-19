@@ -1,0 +1,21 @@
+deployment:
+  kind: DaemonSet
+ports:
+  web:
+    expose: false
+  websecure:
+    port: 443
+    expose: true
+    exposedPort: 443
+service:
+  enabled: true
+  type: NodePort
+  ports:
+    websecure:
+      nodePort: 30443
+ingressRoute:
+  dashboard:
+    enabled: false
+logs:
+  general:
+    level: INFO
