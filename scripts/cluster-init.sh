@@ -21,6 +21,16 @@ get_hostname(){
   log "Usando hostname actual: ${HOSTNAME_SET}"
 }
 
+fix_hosts(){
+  HOSTNAME_SET="$(hostname)"
+  if ! grep -q "127.0.0.1 ${HOSTNAME_SET}" /etc/hosts; then
+    log "Agregando hostname ${HOSTNAME_SET} a /etc/hosts"
+    echo "127.0.0.1 ${HOSTNAME_SET}" >> /etc/hosts
+  else
+    log "Hostname ${HOSTNAME_SET} ya está en /etc/hosts"
+  fi
+}
+
 prepare_os(){
   log "Actualizando paquetes base"
   dnf -y update
@@ -127,6 +137,14 @@ init_cluster(){
 install_helm(){
   log "Instalando Helm"
   curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+
+  # Fix PATH para helm
+  if ! echo $PATH | grep -q "/usr/local/bin"; then
+    log "Agregando /usr/local/bin al PATH"
+    echo 'export PATH=$PATH:/usr/local/bin' >> /etc/profile.d/helm.sh
+    export PATH=$PATH:/usr/local/bin
+  fi
+
   helm version
 }
 
@@ -142,6 +160,7 @@ post_install_tuning(){
 main(){
   require_root
   get_hostname
+  fix_hosts
   prepare_os
   install_containerd
   install_kubernetes
