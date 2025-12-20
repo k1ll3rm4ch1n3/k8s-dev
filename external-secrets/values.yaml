@@ -1,5 +1,74 @@
+# values.yaml para External Secrets Operator
+# Chart: external-secrets/external-secrets
+# Versión: v1.2.0
+
+# Namespace donde se desplegará
+namespace: external-secrets
+
+# Configuración general del operador
+replicaCount: 1
+
+image:
+  repository: ghcr.io/external-secrets/external-secrets
+  tag: v1.2.0
+  pullPolicy: IfNotPresent
+
+# ServiceAccount para el operador
+serviceAccount:
+  create: true
+  name: external-secrets
+
+# RBAC habilitado
+rbac:
+  create: true
+
+# Configuración del webhook
 webhook:
   create: true
-  port: 10250
+  replicaCount: 1
+  image:
+    repository: ghcr.io/external-secrets/external-secrets
+    tag: v1.2.0
+    pullPolicy: IfNotPresent
+  port: 10250   # puerto interno del contenedor
   service:
-    port: 443
+    port: 443   # puerto expuesto en el Service
+  resources: {}
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+
+# Cert-controller (genera certificados para el webhook)
+certController:
+  create: true
+  replicaCount: 1
+  image:
+    repository: ghcr.io/external-secrets/external-secrets
+    tag: v1.2.0
+    pullPolicy: IfNotPresent
+  resources: {}
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+
+# Configuración del operador principal
+controller:
+  create: true
+  replicaCount: 1
+  image:
+    repository: ghcr.io/external-secrets/external-secrets
+    tag: v1.2.0
+    pullPolicy: IfNotPresent
+  resources: {}
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+
+# Métricas y health checks
+metrics:
+  enabled: true
+  serviceMonitor:
+    enabled: false
+
+# Logs
+logLevel: info
