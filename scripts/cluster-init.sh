@@ -59,7 +59,7 @@ EOF
   modprobe overlay
   modprobe br_netfilter
 
-  log "Configurando sysctl para tráfico ponteado"
+  log "Configurando sysctl para tráfico puenteado"
   cat >/etc/sysctl.d/99-kubernetes-cri.conf <<EOF
 net.bridge.bridge-nf-call-iptables = 1
 net.ipv4.ip_forward = 1
@@ -142,7 +142,6 @@ install_helm(){
   if ! echo $PATH | grep -q "/usr/local/bin"; then
     log "Agregando /usr/local/bin al PATH"
     echo 'export PATH=$PATH:/usr/local/bin' >> ~/.bashrc
-    export PATH=$PATH:/usr/local/bin
     source ~/.bashrc || true
   fi
 
