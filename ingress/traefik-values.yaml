@@ -1,41 +1,26 @@
-# traefik-values.yaml
-
-# Configuración de puertos
 ports:
   web:
     port: 80
-    expose: true
     exposedPort: 80
     protocol: TCP
   websecure:
     port: 443
-    expose: true
     exposedPort: 443
     protocol: TCP
 
-# Configuración de proveedores
 providers:
   kubernetesIngress:
     enabled: true
     ingressClass: traefik
     publishedService:
       enabled: true
-    allowExternalNameServices: true
-    exposedByDefault: true
 
-# Habilitar métricas (opcional)
-metrics:
-  prometheus:
-    enabled: true
-
-# Logs (opcional, útil para debug)
 logs:
   general:
     level: INFO
   access:
     enabled: true
 
-# Recursos del pod de Traefik
 resources:
   requests:
     cpu: "100m"
