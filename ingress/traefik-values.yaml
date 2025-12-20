@@ -1,21 +1,45 @@
-deployment:
-  kind: DaemonSet
+# traefik-values.yaml
+
+# Configuración de puertos
 ports:
   web:
-    expose: false
+    port: 80
+    expose: true
+    exposedPort: 80
+    protocol: TCP
   websecure:
     port: 443
     expose: true
     exposedPort: 443
-service:
-  enabled: true
-  type: NodePort
-  ports:
-    websecure:
-      nodePort: 30443
-ingressRoute:
-  dashboard:
-    enabled: false
+    protocol: TCP
+
+# Configuración de proveedores
+providers:
+  kubernetesIngress:
+    enabled: true
+    ingressClass: traefik
+    publishedService:
+      enabled: true
+    allowExternalNameServices: true
+    exposedByDefault: true
+
+# Habilitar métricas (opcional)
+metrics:
+  prometheus:
+    enabled: true
+
+# Logs (opcional, útil para debug)
 logs:
   general:
     level: INFO
+  access:
+    enabled: true
+
+# Recursos del pod de Traefik
+resources:
+  requests:
+    cpu: "100m"
+    memory: "128Mi"
+  limits:
+    cpu: "250m"
+    memory: "256Mi"
