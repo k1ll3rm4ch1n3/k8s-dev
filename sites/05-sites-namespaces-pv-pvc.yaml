@@ -1,12 +1,92 @@
 apiVersion: v1
 kind: Namespace
-metadata: { name: site1 }
+metadata:
+  name: site1
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv-nfs-site1
+spec:
+  capacity:
+    storage: 5Gi
+  accessModes: [ ReadWriteMany ]
+  persistentVolumeReclaimPolicy: Retain
+  nfs:
+    server: 100.106.1.47
+    path: /fsds00Comun/00Web/site1
+  mountOptions: [ nfsvers=3 ]
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pvc-nfs-site1
+  namespace: site1
+spec:
+  accessModes: [ ReadWriteMany ]
+  resources:
+    requests:
+      storage: 5Gi
+  volumeName: pv-nfs-site1
 ---
 apiVersion: v1
 kind: Namespace
-metadata: { name: site2 }
+metadata:
+  name: site2
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv-nfs-site2
+spec:
+  capacity:
+    storage: 5Gi
+  accessModes: [ ReadWriteMany ]
+  persistentVolumeReclaimPolicy: Retain
+  nfs:
+    server: 100.106.1.47
+    path: /fsds00Comun/00Web/site2
+  mountOptions: [ nfsvers=3 ]
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pvc-nfs-site2
+  namespace: site2
+spec:
+  accessModes: [ ReadWriteMany ]
+  resources:
+    requests:
+      storage: 5Gi
+  volumeName: pv-nfs-site2
 ---
 apiVersion: v1
 kind: Namespace
-metadata: { name: site3 }
-# PV/PVC para cada sitio apuntando a /fsds00Comun/00Web/siteX
+metadata:
+  name: site3
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv-nfs-site3
+spec:
+  capacity:
+    storage: 5Gi
+  accessModes: [ ReadWriteMany ]
+  persistentVolumeReclaimPolicy: Retain
+  nfs:
+    server: 100.106.1.47
+    path: /fsds00Comun/00Web/site3
+  mountOptions: [ nfsvers=3 ]
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pvc-nfs-site3
+  namespace: site3
+spec:
+  accessModes: [ ReadWriteMany ]
+  resources:
+    requests:
+      storage: 5Gi
+  volumeName: pv-nfs-site3
