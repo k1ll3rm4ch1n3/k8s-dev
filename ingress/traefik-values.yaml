@@ -8,6 +8,20 @@ ports:
     exposedPort: 443
     protocol: TCP
 
+entryPoints:
+  web:
+    address: ":80"
+    http:
+      redirections:
+        entryPoint:
+          to: websecure
+          scheme: https
+          permanent: true
+  websecure:
+    address: ":443"
+    http:
+      tls: {}
+
 providers:
   kubernetesIngress:
     enabled: true
@@ -20,6 +34,7 @@ logs:
     level: INFO
   access:
     enabled: true
+    format: json
 
 resources:
   requests:
