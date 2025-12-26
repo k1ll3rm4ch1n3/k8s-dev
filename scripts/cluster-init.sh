@@ -6,9 +6,13 @@ K8S_VERSION="${K8S_VERSION:-1.29.0}"         # versión semántica completa
 POD_CIDR="${POD_CIDR:-192.168.0.0/16}"       # red de pods para Calico
 DISABLE_FIREWALL="${DISABLE_FIREWALL:-true}" # para laboratorio
 SELINUX_MODE="disabled"                      # SELinux desactivado
+CLUSTER_NAME="${CLUSTER_NAME:-dev-cluster}"  # nombre del cluster
+DOMAIN="${DOMAIN:-dev.local}"                # dominio para ingress
+NFS_SERVER="${NFS_SERVER:-192.168.1.100}"    # servidor NFS
 # ===========================
 
-log(){ echo -e "[+] $*"; }
+# Logging con color verde
+log(){ echo -e "\033[1;32m[+] $*\033[0m"; }
 
 require_root(){
   if [[ "$(id -u)" -ne 0 ]]; then
@@ -36,7 +40,7 @@ prepare_os(){
   dnf -y update
 
   log "Instalando utilitarios"
-  dnf -y install curl wget tar git bash-completion iproute iptables yum-utils
+  dnf -y install curl wget tar git bash-completion iproute iptables yum-utils nfs-utils
 
   if [[ "${DISABLE_FIREWALL}" == "true" ]]; then
     log "Deshabilitando firewalld (laboratorio)"
@@ -138,7 +142,6 @@ install_helm(){
   log "Instalando Helm"
   curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
 
-  # Fix PATH para helm
   if ! echo $PATH | grep -q "/usr/local/bin"; then
     log "Agregando /usr/local/bin al PATH"
     echo 'export PATH=$PATH:/usr/local/bin' >> ~/.bashrc
@@ -146,6 +149,26 @@ install_helm(){
   fi
 
   helm version
+}
+
+install_traefik(){
+  log "Instalando Traefik con Helm"
+  helm repo add traefik https://traefik.github.io/charts
+  helm repo update
+  helm install traefik traefik/traefik -f manifests/ingress-traefik.yaml
+}
+
+install_external_secrets(){
+  log "Instalando ExternalSecrets"
+  helm repo add external-secrets https://charts.external-secrets.io
+  helm repo update
+  helm install external-secrets external-secrets/external-secrets -f manifests/externalsecrets.yaml
+}
+
+configure_nfs(){
+  log "Configurando NFS con servidor ${NFS_SERVER}"
+  showmount -e "${NFS_SERVER}" || true
+  kubectl apply -f manifests/pv-pvc.yaml
 }
 
 post_install_tuning(){
@@ -157,6 +180,14 @@ post_install_tuning(){
   } >> /etc/bashrc
 }
 
+validations(){
+  log "Validando estado del cluster"
+  kubectl get nodes
+  kubectl get pods -A
+  kubectl get pv,pvc
+  kubectl get secrets
+}
+
 main(){
   require_root
   get_hostname
@@ -166,9 +197,13 @@ main(){
   install_kubernetes
   init_cluster
   install_helm
+  install_traefik
+  install_external_secrets
+  configure_nfs
   post_install_tuning
-  log "Cluster single node listo con Helm, SELinux desactivado y zona horaria configurada."
-  echo "Usa: kubectl get nodes && kubectl get pods -A"
+  validations
+  log "Cluster ${CLUSTER_NAME} listo con Traefik, ExternalSecrets y NFS configurados."
+  echo "Accede a tus apps vía dominio: ${DOMAIN}"
 }
 
 if [[ "${1:-}" == "reset" ]]; then
@@ -176,7 +211,7 @@ if [[ "${1:-}" == "reset" ]]; then
   rm -rf $HOME/.kube
   systemctl restart containerd || true
   iptables -F && iptables -t nat -F && iptables -X
-  rm -rf /etc/cni/net.d
+  rm -rf /etc/cni/net.d /etc/kubernetes/pki /var/lib/etcd
 else
   main
 fi
