@@ -12,3 +12,4 @@ spec:
     - name: https
       port: 443
       targetPort: 10250
+      protocol: TCP
