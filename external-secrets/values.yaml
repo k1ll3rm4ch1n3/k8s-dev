@@ -2,43 +2,43 @@
 # Chart: external-secrets/external-secrets
 # Versión: v1.2.0
 
-# Namespace donde se desplegará
 namespace: external-secrets
 
-# Configuración general del operador
-replicaCount: 1
+replicaCount: 2   # Alta disponibilidad
 
 image:
   repository: ghcr.io/external-secrets/external-secrets
   tag: v1.2.0
   pullPolicy: IfNotPresent
 
-# ServiceAccount para el operador
 serviceAccount:
   create: true
   name: external-secrets
 
-# RBAC habilitado
 rbac:
   create: true
 
-# Configuración del webhook
 webhook:
   create: true
-  replicaCount: 1
+  replicaCount: 2
   image:
     repository: ghcr.io/external-secrets/external-secrets
     tag: v1.2.0
     pullPolicy: IfNotPresent
-  port: 10250   # puerto interno del contenedor
+  port: 10250
   service:
-    port: 443   # puerto expuesto en el Service
-  resources: {}
+    port: 443
+  resources:
+    requests:
+      cpu: "100m"
+      memory: "128Mi"
+    limits:
+      cpu: "250m"
+      memory: "256Mi"
   nodeSelector: {}
   tolerations: []
   affinity: {}
 
-# Cert-controller (genera certificados para el webhook)
 certController:
   create: true
   replicaCount: 1
@@ -46,29 +46,38 @@ certController:
     repository: ghcr.io/external-secrets/external-secrets
     tag: v1.2.0
     pullPolicy: IfNotPresent
-  resources: {}
+  resources:
+    requests:
+      cpu: "50m"
+      memory: "64Mi"
+    limits:
+      cpu: "100m"
+      memory: "128Mi"
   nodeSelector: {}
   tolerations: []
   affinity: {}
 
-# Configuración del operador principal
 controller:
   create: true
-  replicaCount: 1
+  replicaCount: 2
   image:
     repository: ghcr.io/external-secrets/external-secrets
     tag: v1.2.0
     pullPolicy: IfNotPresent
-  resources: {}
+  resources:
+    requests:
+      cpu: "100m"
+      memory: "128Mi"
+    limits:
+      cpu: "250m"
+      memory: "256Mi"
   nodeSelector: {}
   tolerations: []
   affinity: {}
 
-# Métricas y health checks
 metrics:
   enabled: true
   serviceMonitor:
-    enabled: false
+    enabled: true   # Actívalo si usas Prometheus Operator
 
-# Logs
 logLevel: info
