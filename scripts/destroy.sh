@@ -1,31 +1,56 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-log(){ echo -e "[+] $*"; }
+# ====== Configuración ======
+CLUSTER_NAME="${CLUSTER_NAME:-dev-cluster}"
+# ===========================
 
-log "Eliminando despliegues de Traefik y External Secrets..."
-helm uninstall traefik -n traefik || true
-helm uninstall external-secrets -n external-secrets || true
+log(){ echo -e "\033[1;31m[-] $*\033[0m"; }
 
-log "Eliminando namespaces de aplicaciones y operadores..."
-kubectl delete ns certs site1 site2 site3 traefik external-secrets || true
+require_root(){
+  if [[ "$(id -u)" -ne 0 ]]; then
+    echo "Este script debe ejecutarse como root"; exit 1
+  fi
+}
 
-log "Eliminando PersistentVolumes..."
-kubectl delete pv pv-nfs-certs pv-nfs-site1 pv-nfs-site2 pv-nfs-site3 || true
+destroy_cluster(){
+  log "Reseteando cluster con kubeadm"
+  kubeadm reset -f || true
 
-log "Reseteando cluster con kubeadm..."
-kubeadm reset -f || true
+  log "Eliminando configuración de kubectl"
+  rm -rf $HOME/.kube
 
-log "Limpiando configuración local de kubeconfig..."
-rm -rf $HOME/.kube
+  log "Eliminando pods, deployments y servicios"
+  kubectl delete all --all --all-namespaces || true
 
-log "Reiniciando containerd..."
-systemctl restart containerd || true
+  log "Eliminando namespaces adicionales (traefik, externalsecrets)"
+  kubectl delete ns traefik || true
+  kubectl delete ns external-secrets || true
 
-log "Limpiando reglas de iptables..."
-iptables -F && iptables -t nat -F && iptables -X
+  log "Eliminando PV/PVC"
+  kubectl delete pv --all || true
+  kubectl delete pvc --all --all-namespaces || true
 
-log "Eliminando configuración de CNI..."
-rm -rf /etc/cni/net.d
+  log "Eliminando CRDs de ExternalSecrets"
+  kubectl delete crd externalsecrets.external-secrets.io || true
 
-log "Cluster y despliegues eliminados correctamente."
+  log "Limpiando iptables y CNI"
+  iptables -F && iptables -t nat -F && iptables -X
+  rm -rf /etc/cni/net.d
+
+  log "Eliminando certificados y datos de etcd"
+  rm -rf /etc/kubernetes/pki
+  rm -rf /var/lib/etcd
+
+  log "Reiniciando containerd"
+  systemctl restart containerd || true
+}
+
+main(){
+  require_root
+  destroy_cluster
+  log "Cluster ${CLUSTER_NAME} destruido correctamente."
+  echo "Sistema limpio y listo para una nueva inicialización."
+}
+
+main
