@@ -155,14 +155,14 @@ install_traefik(){
   log "Instalando Traefik con Helm"
   helm repo add traefik https://traefik.github.io/charts
   helm repo update
-  helm install traefik traefik/traefik -f manifests/ingress-traefik.yaml
+  helm install traefik traefik/traefik -f sites/08-sites-ingress.yaml
 }
 
 install_external_secrets(){
   log "Instalando ExternalSecrets"
   helm repo add external-secrets https://charts.external-secrets.io
   helm repo update
-  helm install external-secrets external-secrets/external-secrets -f manifests/externalsecrets.yaml
+  helm install external-secrets external-secrets/external-secrets -f sites/06-external-secrets-sites.yaml
 }
 
 configure_nfs(){
