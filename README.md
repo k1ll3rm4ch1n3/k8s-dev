@@ -224,4 +224,79 @@ Para destruir todo el despliegue, usar:
 - DNS externo: debe apuntar los registros A/AAAA de site1, site2, site3 al IP público del servidor, bien se puede apuntar via tabla hosts.
 
 
+# Kubernetes Cluster Deployment Checklist
+
+Este documento sirve como guía de validación paso a paso para asegurar que todos los componentes del cluster estén correctamente desplegados y enlazados.
+
+---
+
+## 🔐 Certificados y sincronización
+- [ ] NFS contiene certificados `.crt` y `.key` válidos por dominio.
+- [ ] Namespace `certs` creado.
+- [ ] PV/PVC `pv-nfs-certs` y `pvc-nfs-certs` apuntan a NFS `/00Certs`.
+- [ ] Deployment `cert-sync` en `certs` con inotify + validación TLS.
+- [ ] Secrets TLS (`secret_<dominio>`) creados en `certs` con hash `sync-hash`.
+
+---
+
+## 🔁 External Secrets
+- [ ] ClusterSecretStore `k8s-cert-store` apunta al namespace `certs`.
+- [ ] Namespaces `site1`, `site2`, `site3` creados.
+- [ ] ExternalSecret `es-siteX-cert` en cada namespace apunta a `k8s-cert-store`.
+- [ ] Secret TLS `tls-siteX` generado en cada namespace (`tls.crt`, `tls.key`).
+
+---
+
+## 📦 Sitios web
+- [ ] PV/PVC por sitio (`pv-nfs-siteX`, `pvc-nfs-siteX`) apuntan a `/00Web/siteX`.
+- [ ] Deployment `web-siteX` con Nginx y PVC montado en `/usr/share/nginx/html`.
+- [ ] Service `web-siteX` expone el pod en puerto 80.
+
+---
+
+## 🌐 Ingress y Traefik
+- [ ] Ingress `siteX-ing` con `ingressClassName: traefik`.
+- [ ] TLS habilitado con `secretName: tls-siteX`.
+- [ ] Anotaciones Traefik:  
+  - `traefik.ingress.kubernetes.io/router.entrypoints: websecure`  
+  - `traefik.ingress.kubernetes.io/router.tls: "true"`
+- [ ] Traefik configurado con entrypoints `web` y `websecure`.
+- [ ] Redirección HTTP → HTTPS activa.
+- [ ] Traefik expone puerto 443 y enruta correctamente a cada sitio.
+
+---
+
+## 🧠 External Secrets Operator
+- [ ] Helm chart desplegado en namespace `external-secrets`.
+- [ ] Webhook y cert-controller activos.
+- [ ] Service `external-secrets-webhook` expone puerto 443 → 10250.
+- [ ] Logs habilitados (`logLevel: info`).
+- [ ] Métricas activas (`metrics.enabled: true`).
+
+---
+
+## 📊 Diagrama de arquitectura
+
+El siguiente diagrama muestra el flujo completo del cluster:
+
+1. **NFS** → almacena certificados y contenido web.  
+2. **Namespace `certs`** → sincroniza certificados con `cert-sync`.  
+3. **ClusterSecretStore `k8s-cert-store`** → expone Secrets a otros namespaces.  
+4. **ExternalSecrets** → generan Secrets TLS (`tls-siteX`) en cada sitio.  
+5. **Deployments web-siteX** → montan PVC NFS y sirven contenido con Nginx.  
+6. **Services web-siteX** → exponen los pods internamente.  
+7. **Ingress siteX-ing** → enrutan tráfico HTTPS con certificados TLS.  
+8. **Traefik** → maneja entrypoints `websecure` y fuerza HTTPS.  
+9. **Usuarios** → acceden a los sitios de forma segura vía HTTPS.
+
+*(Aquí se puede insertar el diagrama generado en la documentación del repositorio, por ejemplo como imagen PNG o SVG.)*
+
+---
+
+## 📑 Uso del checklist
+Este checklist puede utilizarse para:
+- Validación inicial del despliegue del cluster.
+- Auditorías de cumplimiento (SSL en todos los puntos).
+- Troubleshooting en caso de fallos de integración.
+- Documentación operativa para el equipo de infraestructura.
 
