@@ -126,9 +126,9 @@ Este proyecto es open source bajo licencia MIT.
         kubectl -n site1 get secret tls-site1
         kubectl -n site1 get secret tls-site1
         kubectl -n site1 get secret tls-site1
-    # Navegar a https://site1.celmediafidelizacion.cl
-                https://site2.celmediafidelizacion.cl
-                https://site3.celmediafidelizacion.cl
+    # Navegar a https://site1.exampledomain.cl
+                https://site2.exampledomain.cl
+                https://site3.exampledomain.cl
 
 🧹 Limpieza
 Para destruir todo el despliegue, usar:
@@ -148,4 +148,5 @@ Para destruir todo el despliegue, usar:
 - NFS: se monta en modo ReadOnlyMany.
 - Certificados: sincronizados automáticamente cada 90 segundos.
 - DNS externo: debe apuntar los registros A/AAAA de site1, site2, site3 al IP público del servidor, bien se puede apuntar via tabla hosts.
+
 
