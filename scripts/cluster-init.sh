@@ -168,7 +168,7 @@ install_external_secrets(){
 configure_nfs(){
   log "Configurando NFS con servidor ${NFS_SERVER}"
   showmount -e "${NFS_SERVER}" || true
-  kubectl apply -f manifests/pv-pvc.yaml
+  kubectl apply -f sites/01-certs-namespace-pv-pvc.yaml
 }
 
 post_install_tuning(){
