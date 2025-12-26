@@ -4,8 +4,10 @@ metadata:
   name: site1-ing
   namespace: site1
   annotations:
-    kubernetes.io/ingress.class: traefik
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.tls: "true"
 spec:
+  ingressClassName: traefik
   tls:
     - hosts:
         - site1.celmediafidelizacion.cl
@@ -28,8 +30,10 @@ metadata:
   name: site2-ing
   namespace: site2
   annotations:
-    kubernetes.io/ingress.class: traefik
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.tls: "true"
 spec:
+  ingressClassName: traefik
   tls:
     - hosts:
         - site2.celmediafidelizacion.cl
@@ -52,8 +56,10 @@ metadata:
   name: site3-ing
   namespace: site3
   annotations:
-    kubernetes.io/ingress.class: traefik
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.tls: "true"
 spec:
+  ingressClassName: traefik
   tls:
     - hosts:
         - site3.celmediafidelizacion.cl
