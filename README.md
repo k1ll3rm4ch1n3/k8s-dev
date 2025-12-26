@@ -1,30 +1,89 @@
-🚀 Kubernetes Single‑Node en Oracle Linux 9
+# k8s-dev 🚀
+
+Repositorio público para la construcción de un **cluster Kubernetes single-node reproducible**, con automatización vía scripts y despliegue de componentes clave como **Helm**, **Traefik**, **ExternalSecrets** y almacenamiento persistente con **NFS**.  
+El objetivo es validar un flujo completo de instalación y operación, documentar cada paso y preparar el terreno para escalar a **multi-node, multi-cloud**.
+
 🎯 Objetivo
-Desplegar un cluster single‑node Kubernetes en Oracle Linux 9 (minimal), con:
 - Helm instalado desde el inicio.
 - Traefik como Ingress Controller.
 - External Secrets Operator para consumir certificados centralizados.
 - Pod sincronizador que exporta certificados SSL desde un storage NFS a Secrets.
 - Tres sitios web de prueba (site1, site2, site3) cada uno en su propio namespace, sirviendo contenido desde NFS y expuestos con TLS en dominios distintos.
 
+---
+
+## 📋 Requisitos previos
+
+- **Sistema operativo**: Oracle Linux 9 / Ubuntu 22.04 (probado en Oracle Linux).
+- **Dependencias instaladas**:
+  - `docker`
+  - `kubectl`
+  - `helm`
+  - `git`
+  - `nfs-utils`
+- **Recursos mínimos recomendados**:
+  - 4 CPU
+  - 8 GB RAM
+  - 50 GB disco
+- **Certificados/secretos iniciales**: si se requiere sincronización con `ExternalSecrets`.
+
+## ⚙️ Instalación paso a paso
+1. Clonar el repositorio:
+   ```bash
+   git clone https://github.com/k1ll3rm4ch1n3/k8s-dev.git
+   cd k8s-dev
+
+2. 	Ejecutar el script de inicialización:
+    ```bash
+   	 ./scripts/cluster-init.sh
+
+3. 	Validar estado del cluster:
+    ```bash
+    kubectl get nodes
+    kubectl get pods -A
+   
+4. 	Troubleshooting básico:
+    ```bash
+    kubectl describe pod <nombre>
+    journalctl -u kubelet
+
 📂 Estructura del repositorio
-    k8s-single-node/
-    ├── scripts/
-    │   ├── cluster-init.sh          # Script maestro para inicializar cluster
-    │   └── destroy.sh               # Limpieza total del cluster y recursos
-    ├── ingress/
-    │   └── traefik-values.yaml      # Configuración de Traefik
-    ├── certs/
-    │   ├── 01-namespace-pv-pvc.yaml # Namespace y PV/PVC NFS
-    │   ├── 02-rbac.yaml             # RBAC para sincronizador
-    │   ├── 03-cert-sync-deploy.yaml # Deployment sincronizador con recursos asignados
-    │   └── 04-clustersecretstore.yaml
-    ├── sites/
-    │   ├── 05-namespaces-pv-pvc.yaml # Namespaces y PV/PVC para cada sitio
-    │   ├── 06-external-secrets.yaml  # ExternalSecrets para consumir TLS centralizados
-    │   ├── 07-deploy-svc.yaml        # Deployments y Services con recursos asignados
-    │   └── 08-ingress.yaml           # Ingress único para los tres sitios
-    └── README.md                     # Documentación completa
+    k8s-dev/
+        ├── README.md                # Guía principal del proyecto
+        ├── scripts/                 # Scripts de automatización
+        │   ├── cluster-init.sh      # Script principal para inicializar el cluster
+        │   ├── helpers.sh           # Funciones auxiliares (si aplica)
+        │   └── validate.sh          # Validaciones post-deploy
+        ├── manifests/               # Manifests de Kubernetes
+        │   ├── pv-pvc.yaml          # Persistencia con NFS
+        │   ├── ingress-traefik.yaml # Configuración de Traefik
+        │   ├── rbac.yaml            # Roles y permisos
+        │   ├── secrets.yaml         # Ejemplo de secretos
+        │   └── externalsecrets.yaml # Integración con ExternalSecrets
+        ├── docs/                    # Documentación adicional
+        │   ├── troubleshooting.md   # Guía de resolución de problemas
+        │   └── roadmap.md           # Plan de evolución del proyecto
+        └── .gitignore               # Archivos ignorados por git
+
+✅ Validaciones rápidas
+• 	Nodo listo:  → STATUS 
+• 	Traefik corriendo: 
+• 	NFS montado: 
+• 	ExternalSecrets sincronizando: 
+
+🛠️ Roadmap
+• 	Consolidar documentación y reproducibilidad en single-node.
+• 	Extender a cluster multi-node.
+• 	Integración con GitLab + Terraform para despliegues multi-cloud.
+• 	Portabilidad hacia GCP/Azure sin vendor lock-in.
+
+🤝 Contribuir
+• 	Reportar issues en GitHub.
+• 	Pull requests bienvenidos (scripts, manifests, docs).
+• 	Mantener estilo modular y documentado.
+
+📜 Licencia
+Este proyecto es open source bajo licencia MIT.
 
 🔄 Flujo de creación
 1. Inicialización del servidor y cluster
@@ -89,3 +148,4 @@ Para destruir todo el despliegue, usar:
 - NFS: se monta en modo ReadOnlyMany.
 - Certificados: sincronizados automáticamente cada 90 segundos.
 - DNS externo: debe apuntar los registros A/AAAA de site1, site2, site3 al IP público del servidor, bien se puede apuntar via tabla hosts.
+
