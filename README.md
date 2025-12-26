@@ -1,7 +1,6 @@
-# k8s-dev 🚀
-
-Repositorio público para la construcción de un **cluster Kubernetes single-node reproducible**, con automatización vía scripts y despliegue de componentes clave como **Helm**, **Traefik**, **ExternalSecrets** y almacenamiento persistente con **NFS**.  
-El objetivo es validar un flujo completo de instalación y operación, documentar cada paso y preparar el terreno para escalar a **multi-node, multi-cloud**.
+k8s-dev 🚀
+Repositorio público para la construcción de un cluster Kubernetes single-node reproducible, con automatización vía scripts y despliegue de componentes clave como Helm, Traefik, ExternalSecrets y almacenamiento persistente con NFS.
+El objetivo es validar un flujo completo de instalación y operación, documentar cada paso y preparar el terreno para escalar a multi-node, multi-cloud.
 
 🎯 Objetivo
 - Helm instalado desde el inicio.
@@ -12,20 +11,22 @@ El objetivo es validar un flujo completo de instalación y operación, documenta
 
 ---
 
-## 📋 Requisitos previos
-
-- **Sistema operativo**: Oracle Linux 9 / Ubuntu 22.04 (probado en Oracle Linux).
-- **Dependencias instaladas**:
-  - `docker`
-  - `kubectl`
-  - `helm`
-  - `git`
-  - `nfs-utils`
-- **Recursos mínimos recomendados**:
-  - 4 CPU
-  - 8 GB RAM
-  - 50 GB disco
-- **Certificados/secretos iniciales**: si se requiere sincronización con `ExternalSecrets`.
+📋 Requisitos previos
+• 	Sistema operativo: Oracle Linux 9 / Ubuntu 22.04 (probado en Oracle Linux).
+• 	Dependencias instaladas:
+    • 	Docker
+    • 	kubectl
+    • 	helm
+    • 	git
+    • 	nfs-utils
+• 	Versiones mínimas probadas:
+    • 	Kubernetes >= 1.29
+    • 	Helm >= 3.14
+• 	Recursos mínimos recomendados:
+    • 	4 CPU
+    • 	8 GB RAM
+    • 	50 GB disco
+• 	Certificados/secretos iniciales: si se requiere sincronización con "ExterbakSecrets"
 
 ## ⚙️ Instalación paso a paso
 1. Clonar el repositorio:
@@ -33,16 +34,22 @@ El objetivo es validar un flujo completo de instalación y operación, documenta
    git clone https://github.com/k1ll3rm4ch1n3/k8s-dev.git
    cd k8s-dev
 
-2. 	Ejecutar el script de inicialización:
-    ```bash
-   	 ./scripts/cluster-init.sh
+2. Exportar variables de entorno necesarias:
+   ```bash
+   export CLUSTER_NAME=dev-cluster
+   export NFS_SERVER=192.168.1.100
+   export DOMAIN=dev.local
 
-3. 	Validar estado del cluster:
+3. 	Ejecutar el script de inicialización:
+    ```bash
+   	./scripts/cluster-init.sh
+
+4. 	Validar estado del cluster:
     ```bash
     kubectl get nodes
     kubectl get pods -A
    
-4. 	Troubleshooting básico:
+5. 	Troubleshooting básico:
     ```bash
     kubectl describe pod <nombre>
     journalctl -u kubelet
@@ -71,6 +78,73 @@ El objetivo es validar un flujo completo de instalación y operación, documenta
 • 	NFS montado: 
 • 	ExternalSecrets sincronizando: 
 
+🌐 Configuración de red
+    Este cluster utiliza un CNI (ej. flannel o calico). Validar con:
+    ```bash
+    kubectl get pods -n kube-system
+
+📦 Ejemplo de despliegue de aplicación
+Para validar que Ingress + Traefik funcionan correctamente:
+1. Crear un deployment de Nginx:
+   ```yaml
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: nginx
+      spec:
+        replicas: 1
+        selector:
+          matchLabels:
+            app: nginx
+      template:
+        metadata:
+          labels:
+            app: nginx
+        spec:
+          containers:
+          - name: nginx
+            image: nginx:latest
+            ports:
+            - containerPort: 80
+
+2. Crear un servicio:
+   ```yaml
+    apiVersion: v1
+    kind: Service
+    metadata:
+      name: nginx-service
+    spec:
+      selector:
+        app: nginx
+    ports:
+      - protocol: TCP
+        port: 80
+        targetPort: 80
+
+3. Crear un ingress para Traefik:
+   ```yaml
+    apiVersion: networking.k8s.io/v1
+    kind: Ingress
+    metadata:
+      name: nginx-ingress
+      annotations:
+        kubernetes.io/ingress.class: traefik
+    spec:
+      rules:
+      - host: nginx.dev.local
+        http:
+          paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: nginx-service
+                port:
+                  number: 80
+4. Validar acceso:
+   ```bash
+   curl http://nginx.dev.local
+   
 🛠️ Roadmap
 • 	Consolidar documentación y reproducibilidad en single-node.
 • 	Extender a cluster multi-node.
@@ -148,5 +222,6 @@ Para destruir todo el despliegue, usar:
 - NFS: se monta en modo ReadOnlyMany.
 - Certificados: sincronizados automáticamente cada 90 segundos.
 - DNS externo: debe apuntar los registros A/AAAA de site1, site2, site3 al IP público del servidor, bien se puede apuntar via tabla hosts.
+
 
 
