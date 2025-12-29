@@ -60,21 +60,21 @@ El objetivo es validar un flujo completo de instalación y operación, documenta
 
 📂 Estructura del repositorio
     k8s-dev/
-        ├── README.md                # Guía principal del proyecto
-        ├── scripts/                 # Scripts de automatización
-        │   ├── cluster-init.sh      # Script principal para inicializar el cluster
-        │   ├── helpers.sh           # Funciones auxiliares (si aplica)
-        │   └── validate.sh          # Validaciones post-deploy
-        ├── manifests/               # Manifests de Kubernetes
-        │   ├── pv-pvc.yaml          # Persistencia con NFS
-        │   ├── ingress-traefik.yaml # Configuración de Traefik
-        │   ├── rbac.yaml            # Roles y permisos
-        │   ├── secrets.yaml         # Ejemplo de secretos
-        │   └── externalsecrets.yaml # Integración con ExternalSecrets
-        ├── docs/                    # Documentación adicional
-        │   ├── troubleshooting.md   # Guía de resolución de problemas
-        │   └── roadmap.md           # Plan de evolución del proyecto
-        └── .gitignore               # Archivos ignorados por git
+├── README.md                # Guía principal del proyecto
+├── scripts/                 # Scripts de automatización
+│   ├── cluster-init.sh      # Script principal para inicializar el cluster
+│   ├── helpers.sh           # Funciones auxiliares (si aplica)
+│   └── validate.sh          # Validaciones post-deploy
+├── manifests/               # Manifests de Kubernetes
+│   ├── pv-pvc.yaml          # Persistencia con NFS
+│   ├── ingress-traefik.yaml # Configuración de Traefik
+│   ├── rbac.yaml            # Roles y permisos
+│   ├── secrets.yaml         # Ejemplo de secretos
+│   └── externalsecrets.yaml # Integración con ExternalSecrets
+├── docs/                    # Documentación adicional
+│   ├── troubleshooting.md   # Guía de resolución de problemas
+│   └── roadmap.md           # Plan de evolución del proyecto
+└── .gitignore               # Archivos ignorados por git
 
 ✅ Validaciones rápidas
 • 	Nodo listo:  → STATUS 
@@ -303,5 +303,6 @@ Este checklist puede utilizarse para:
 - Auditorías de cumplimiento (SSL en todos los puntos).
 - Troubleshooting en caso de fallos de integración.
 - Documentación operativa para el equipo de infraestructura.
+
 
 
