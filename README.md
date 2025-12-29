@@ -14,23 +14,23 @@ El objetivo es validar un flujo completo de instalación y operación, documenta
 📋 Requisitos previos
 • 	Sistema operativo: Oracle Linux 9 / Ubuntu 22.04 (probado en Oracle Linux).
 
-• 	Dependencias instaladas:
-    • 	Docker
-    • 	kubectl
-    • 	helm
-    • 	git
-    • 	nfs-utils
-
-• 	Versiones mínimas probadas:
-    • 	Kubernetes >= 1.29
-    • 	Helm >= 3.14
-
-• 	Recursos mínimos recomendados:
-    • 	4 CPU
-    • 	8 GB RAM
-    • 	50 GB disco
-
-• 	Certificados/secretos iniciales: si se requiere sincronización con "ExterbakSecrets"
+    • 	Dependencias instaladas:
+            • 	Docker
+            • 	kubectl
+            • 	helm
+            • 	git
+            • 	nfs-utils
+    
+    • 	Versiones mínimas probadas:
+            • 	Kubernetes >= 1.29
+            • 	Helm >= 3.14
+    
+    • 	Recursos mínimos recomendados:
+            • 	4 CPU
+            • 	8 GB RAM
+            • 	50 GB disco
+    
+    • 	Certificados/secretos iniciales: si se requiere sincronización con "ExterbakSecrets"
 
 ## ⚙️ Instalación paso a paso
 1. Clonar el repositorio:
@@ -304,6 +304,7 @@ Este checklist puede utilizarse para:
 - Auditorías de cumplimiento (SSL en todos los puntos).
 - Troubleshooting en caso de fallos de integración.
 - Documentación operativa para el equipo de infraestructura.
+
 
 
 
