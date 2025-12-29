@@ -78,13 +78,15 @@ El objetivo es validar un flujo completo de instalación y operación, documenta
     └── .gitignore               # Archivos ignorados por git
 
 ✅ Validaciones rápidas
-• 	Nodo listo:  → STATUS 
-• 	Traefik corriendo: 
-• 	NFS montado: 
-• 	ExternalSecrets sincronizando: 
+
+    • 	Nodo listo:  → STATUS 
+    • 	Traefik corriendo: 
+    • 	NFS montado: 
+    • 	ExternalSecrets sincronizando
 
 🌐 Configuración de red
     Este cluster utiliza un CNI (ej. flannel o calico). Validar con:
+    
     ```bash
     kubectl get pods -n kube-system
 
@@ -151,15 +153,17 @@ Para validar que Ingress + Traefik funcionan correctamente:
    curl http://nginx.dev.local
    
 🛠️ Roadmap
-• 	Consolidar documentación y reproducibilidad en single-node.
-• 	Extender a cluster multi-node.
-• 	Integración con GitLab + Terraform para despliegues multi-cloud.
-• 	Portabilidad hacia GCP/Azure sin vendor lock-in.
+
+    • 	Consolidar documentación y reproducibilidad en single-node.
+    • 	Extender a cluster multi-node.
+    • 	Integración con GitLab + Terraform para despliegues multi-cloud.
+    • 	Portabilidad hacia GCP/Azure sin vendor lock-in.
 
 🤝 Contribuir
-• 	Reportar issues en GitHub.
-• 	Pull requests bienvenidos (scripts, manifests, docs).
-• 	Mantener estilo modular y documentado.
+
+    • 	Reportar issues en GitHub.
+    • 	Pull requests bienvenidos (scripts, manifests, docs).
+    • 	Mantener estilo modular y documentado.
 
 📜 Licencia
 Este proyecto es open source bajo licencia MIT.
@@ -304,6 +308,7 @@ Este checklist puede utilizarse para:
 - Auditorías de cumplimiento (SSL en todos los puntos).
 - Troubleshooting en caso de fallos de integración.
 - Documentación operativa para el equipo de infraestructura.
+
 
 
 
