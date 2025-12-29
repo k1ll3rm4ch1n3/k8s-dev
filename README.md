@@ -60,6 +60,7 @@ El objetivo es validar un flujo completo de instalación y operación, documenta
 
 📂 Estructura del repositorio
     k8s-dev/
+
 ├── README.md                # Guía principal del proyecto
 ├── scripts/                 # Scripts de automatización
 │   ├── cluster-init.sh      # Script principal para inicializar el cluster
@@ -303,6 +304,7 @@ Este checklist puede utilizarse para:
 - Auditorías de cumplimiento (SSL en todos los puntos).
 - Troubleshooting en caso de fallos de integración.
 - Documentación operativa para el equipo de infraestructura.
+
 
 
 
