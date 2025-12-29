@@ -1,5 +1,6 @@
 k8s-dev 🚀
-Repositorio público para la construcción de un cluster Kubernetes single-node reproducible, con automatización vía scripts y despliegue de componentes clave como Helm, Traefik, ExternalSecrets y almacenamiento persistente con NFS.
+
+Repositorio para la construcción de un cluster Kubernetes single-node reproducible, con automatización vía scripts y despliegue de componentes clave como Helm, Traefik, ExternalSecrets y almacenamiento persistente con NFS.
 El objetivo es validar un flujo completo de instalación y operación, documentar cada paso y preparar el terreno para escalar a multi-node, multi-cloud.
 
 🎯 Objetivo
@@ -20,16 +21,13 @@ El objetivo es validar un flujo completo de instalación y operación, documenta
             • 	helm
             • 	git
             • 	nfs-utils
-    
     • 	Versiones mínimas probadas:
             • 	Kubernetes >= 1.29
-            • 	Helm >= 3.14
-    
+            • 	Helm >= 3.14 
     • 	Recursos mínimos recomendados:
             • 	4 CPU
             • 	8 GB RAM
             • 	50 GB disco
-    
     • 	Certificados/secretos iniciales: si se requiere sincronización con "ExterbakSecrets"
 
 ## ⚙️ Instalación paso a paso
@@ -166,6 +164,7 @@ Para validar que Ingress + Traefik funcionan correctamente:
     • 	Mantener estilo modular y documentado.
 
 📜 Licencia
+
 Este proyecto es open source bajo licencia MIT.
 
 🔄 Flujo de creación
@@ -308,6 +307,7 @@ Este checklist puede utilizarse para:
 - Auditorías de cumplimiento (SSL en todos los puntos).
 - Troubleshooting en caso de fallos de integración.
 - Documentación operativa para el equipo de infraestructura.
+
 
 
 
